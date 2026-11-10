@@ -17,6 +17,28 @@ Regras de negócio em CLAUDE.md; módulos em [modulos.md](modulos.md); visual em
 
 Portas diferentes do Reurb (5442, 3100, 8180) para os dois rodarem juntos.
 
+### Dados fictícios
+
+`DATABASE_URL=postgres://central:central_local@localhost:5443/central pnpm semear` cria duas escolas
+demonstrativas, quatro turmas, 34 estudantes ("Estudante 01"…) e um usuário de cada perfil, todos
+com a senha `1234567890` (só para desenvolvimento local):
+
+| Login | Perfil | O que enxerga |
+|---|---|---|
+| `prof.ana` | Professor | 1º ano A e 2º ano A da Escola A |
+| `prof.pedro` | Professor | 2º ano da Escola B |
+| `coord.marina` | Coordenação | Escola A inteira |
+| `equipe.semed` | Equipe pedagógica | Rede inteira |
+| `gestor.semed` | Gestão | Rede inteira, sem nomes de estudantes |
+| `cadastro.semed` | Cadastro | Rede inteira; cadastra e importa |
+
+### Armadilha conhecida
+
+Pacote do workspace usado **em tempo de execução** pela API (ex.: `PERFIS`, `ETAPAS` de
+`@central/tipos`) vai em `dependencies`, nunca em `devDependencies`. Os testes leem o código-fonte e
+passam; a imagem Docker de produção não leva dependência de desenvolvimento e a API não sobe.
+Depois de mudar dependências da API, rode `docker compose -f infra/docker-compose.yml up -d --build api`.
+
 ## 2. Ferramentas do Claude Code no projeto
 
 Configuradas em `.mcp.json` (vale para quem abrir o projeto) e, para a chave do 21st, na

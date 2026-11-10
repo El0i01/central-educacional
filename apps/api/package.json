@@ -14,6 +14,7 @@
     "@central/escopo": "workspace:^",
     "@central/fleo": "workspace:^",
     "@central/importacao": "workspace:^",
+    "@central/tipos": "workspace:^",
     "bcryptjs": "3",
     "express": "^5.3.0",
     "jsonwebtoken": "9",
@@ -21,7 +22,6 @@
   },
   "devDependencies": {
     "@central/database": "workspace:^",
-    "@central/tipos": "workspace:^",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "9",
     "@types/node": "^20.19.43",

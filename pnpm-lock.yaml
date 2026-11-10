@@ -41,6 +41,9 @@ importers:
       '@central/importacao':
         specifier: workspace:^
         version: link:../../packages/importacao
+      '@central/tipos':
+        specifier: workspace:^
+        version: link:../../packages/tipos
       bcryptjs:
         specifier: '3'
         version: 3.0.3
@@ -57,9 +60,6 @@ importers:
       '@central/database':
         specifier: workspace:^
         version: link:../../database
-      '@central/tipos':
-        specifier: workspace:^
-        version: link:../../packages/tipos
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
