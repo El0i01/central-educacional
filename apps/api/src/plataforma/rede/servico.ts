@@ -87,7 +87,12 @@ export async function conferirMatricula(
 
 export interface ResultadoImportacao {
   matricula: 'criada' | 'ja_existia';
+  matriculaId: number;
+  /** Situação antes da publicação (null = matrícula nova). Serve para desfazer. */
+  situacaoAntes: string | null;
+  turmaId: number;
   turmaCriada: boolean;
+  estudanteId: number;
   estudanteCriado: boolean;
 }
 
@@ -127,6 +132,10 @@ export async function importarMatricula(
     estudanteCriado = true;
   }
 
+  const antes = await c.query<{ situacao: string }>(
+    'SELECT situacao FROM rede.matricula WHERE estudante_id = $1 AND turma_id = $2',
+    [estudante, turma.id],
+  );
   const m = await c.query<{ id: number; nova: boolean }>(
     `INSERT INTO rede.matricula (estudante_id, turma_id) VALUES ($1, $2)
      ON CONFLICT (estudante_id, turma_id) DO UPDATE SET situacao = 'ativa'
@@ -139,5 +148,94 @@ export async function importarMatricula(
       dados: { origem: 'importacao', estudanteId: estudante, turmaId: turma.id }, usuarioId,
     });
   }
-  return { matricula: m.rows[0]!.nova ? 'criada' : 'ja_existia', turmaCriada, estudanteCriado };
+  return {
+    matricula: m.rows[0]!.nova ? 'criada' : 'ja_existia',
+    matriculaId: m.rows[0]!.id,
+    situacaoAntes: antes.rows[0]?.situacao ?? null,
+    turmaId: turma.id,
+    turmaCriada,
+    estudanteId: estudante,
+    estudanteCriado,
+  };
+}
+
+/** Erro de regra ao desfazer: a importação não volta atrás e nada é alterado. */
+export class ErroDesfazer extends Error {}
+
+/**
+ * Desfaz o que `importarMatricula` fez com uma linha (dentro da transação de quem chama, UC-M05).
+ * Matrícula criada sai; matrícula reativada volta à situação anterior; turma e estudante criados
+ * saem só se nada mais depende deles (professor atribuído, outra matrícula, ficha de módulo).
+ */
+export async function desfazerMatricula(
+  c: pg.ClientBase,
+  r: ResultadoImportacao,
+  usuarioId: number,
+  loteId: number,
+): Promise<void> {
+  const atual = await c.query<{ situacao: string; estudante: string }>(
+    `SELECT m.situacao, s.nome AS estudante FROM rede.matricula m JOIN rede.estudante s ON s.id = m.estudante_id
+      WHERE m.id = $1 FOR UPDATE OF m`,
+    [r.matriculaId],
+  );
+  const m = atual.rows[0];
+  if (r.matricula === 'criada') {
+    if (!m) return; // já saiu por outro caminho
+    if (m.situacao !== 'ativa') {
+      throw new ErroDesfazer(
+        `A matrícula de ${m.estudante} mudou depois da importação (agora: ${m.situacao}). Desfaça à mão o que for preciso.`,
+      );
+    }
+    // Ficha de módulo (FLEO) ligada à matrícula barra pela chave estrangeira: aí não se desfaz.
+    await c.query('SAVEPOINT desfazer_matricula');
+    try {
+      await c.query('DELETE FROM rede.matricula WHERE id = $1', [r.matriculaId]);
+      await c.query('RELEASE SAVEPOINT desfazer_matricula');
+    } catch (erro) {
+      await c.query('ROLLBACK TO SAVEPOINT desfazer_matricula');
+      if ((erro as { code?: string }).code === '23503') {
+        throw new ErroDesfazer(`${m.estudante} já tem ficha aberta em um módulo. A importação não pode mais ser desfeita.`);
+      }
+      throw erro;
+    }
+    await registrarHistorico(c, {
+      modulo: 'rede', entidade: 'matricula', entidadeId: r.matriculaId, acao: 'exclusao',
+      dados: { origem: 'importacao.desfazer', loteId }, usuarioId,
+    });
+  } else if (m && r.situacaoAntes && r.situacaoAntes !== m.situacao) {
+    await c.query('UPDATE rede.matricula SET situacao = $2 WHERE id = $1', [r.matriculaId, r.situacaoAntes]);
+    await registrarHistorico(c, {
+      modulo: 'rede', entidade: 'matricula', entidadeId: r.matriculaId, acao: 'situacao',
+      dados: { antes: m.situacao, depois: r.situacaoAntes, origem: 'importacao.desfazer', loteId }, usuarioId,
+    });
+  }
+
+  if (r.estudanteCriado) {
+    await apagarSeSolto(c, 'estudante', r.estudanteId,
+      'DELETE FROM rede.estudante WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM rede.matricula WHERE estudante_id = $1)');
+  }
+  if (r.turmaCriada) {
+    await apagarSeSolto(c, 'turma', r.turmaId,
+      `DELETE FROM rede.turma WHERE id = $1
+         AND NOT EXISTS (SELECT 1 FROM rede.matricula WHERE turma_id = $1)
+         AND NOT EXISTS (SELECT 1 FROM rede.turma_professor WHERE turma_id = $1)`);
+  }
+
+  async function apagarSeSolto(cx: pg.ClientBase, entidade: string, id: number, sql: string) {
+    await cx.query('SAVEPOINT desfazer_solto');
+    try {
+      const d = await cx.query(sql, [id]);
+      await cx.query('RELEASE SAVEPOINT desfazer_solto');
+      if (d.rowCount) {
+        await registrarHistorico(cx, {
+          modulo: 'rede', entidade, entidadeId: id, acao: 'exclusao',
+          dados: { origem: 'importacao.desfazer', loteId }, usuarioId,
+        });
+      }
+    } catch (erro) {
+      // Algo de fora da rede depende dele: fica.
+      await cx.query('ROLLBACK TO SAVEPOINT desfazer_solto');
+      if ((erro as { code?: string }).code !== '23503') throw erro;
+    }
+  }
 }

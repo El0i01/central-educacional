@@ -299,6 +299,22 @@ export interface TurmaDetalhe extends TurmaLista {
   pode: { editar: boolean; atribuirProfessores: boolean; matricular: boolean };
 }
 
+export interface TransferirPedido {
+  /** Turma de destino, no mesmo ano letivo (outra escola ou a mesma). */
+  turmaId: number;
+  motivo?: string | null;
+}
+
+/** Uma matrícula na trajetória do estudante pela rede (UC-R07). */
+export interface TrajetoriaItem {
+  matriculaId: number;
+  anoLetivo: number;
+  escola: string;
+  turma: string;
+  etapa: Etapa;
+  situacao: SituacaoMatricula;
+}
+
 export interface MatricularPedido {
   /** Estudante já cadastrado na rede, ou os dados de um novo. */
   estudanteId?: number;
@@ -318,13 +334,14 @@ export interface PossivelDuplicado {
 
 // --- Plataforma: importação (M09, UC-M01 a M05) ---
 
-export type SituacaoLote = 'com_inconsistencias' | 'pronto' | 'publicado' | 'descartado';
+export type SituacaoLote = 'com_inconsistencias' | 'pronto' | 'publicado' | 'descartado' | 'desfeito';
 
 export const ROTULO_SITUACAO_LOTE: Record<SituacaoLote, string> = {
   com_inconsistencias: 'Com inconsistências',
   pronto: 'Pronto para publicar',
   publicado: 'Publicado',
   descartado: 'Descartado',
+  desfeito: 'Desfeito',
 };
 
 export interface LinhaImportacao {
@@ -362,6 +379,10 @@ export interface LoteImportacao {
   criadoPor: string;
   criadoEm: string;
   publicadoEm: string | null;
+  desfeitoEm: string | null;
+  desfeitoMotivo: string | null;
+  /** Só a última publicação pode ser desfeita (e só por quem importa). */
+  podeDesfazer: boolean;
   linhas?: LinhaImportacao[];
 }
 
@@ -370,4 +391,35 @@ export interface NovaImportacaoPedido {
   arquivoNome: string;
   conteudo: string;
   anoLetivo?: number;
+}
+
+// --- Plataforma: configuração e histórico de acessos (UC-A07, A08) ---
+
+export interface ModuloConfig extends ModuloAtivo {
+  ativo: boolean;
+}
+
+export type TipoRegistroAcesso = 'entradas' | 'nominal' | 'alteracoes';
+
+export interface RegistroAcesso {
+  id: number;
+  quando: string;
+  /** null = o sistema (ex.: bloqueio automático). */
+  usuario: string | null;
+  login: string | null;
+  /** entradas e alterações: 'acesso', 'rede'...; nominal: o contexto ('rede.turma'). */
+  modulo: string;
+  acao: string;
+  entidade: string | null;
+  entidadeId: number | null;
+  motivo: string | null;
+  /** nominal: quantos estudantes tiveram o nome exibido naquela abertura de tela. */
+  estudantes: number | null;
+}
+
+export interface ListaRegistrosAcesso {
+  itens: RegistroAcesso[];
+  total: number;
+  pagina: number;
+  porPagina: number;
 }

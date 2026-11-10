@@ -114,4 +114,48 @@ describe.skipIf(!URL_TESTE)('Importação de matrículas (integração)', () => 
     const t = await pool.query("SELECT 1 FROM rede.turma WHERE nome = '3º ano A'");
     expect(t.rowCount).toBe(0);
   });
+
+  // --- Desfazer (UC-M05) ---
+
+  it('desfazer: só a última publicação, com motivo, e devolve a rede como estava', async () => {
+    const lotes = (await request(app).get('/api/importacoes').set('Authorization', `Bearer ${token}`)).body as
+      { id: number; situacao: string; podeDesfazer: boolean }[];
+    const publicados = lotes.filter((l) => l.situacao === 'publicado');
+    expect(publicados).toHaveLength(2);
+    const [ultimo, primeiro] = publicados as [typeof publicados[0], typeof publicados[0]];
+    expect(ultimo.podeDesfazer).toBe(true);
+    expect(primeiro.podeDesfazer).toBe(false);
+
+    expect((await como(`/api/importacoes/${primeiro.id}/desfazer`, { motivo: 'teste' })).status).toBe(409);
+    expect((await como(`/api/importacoes/${ultimo.id}/desfazer`)).status).toBe(400);
+
+    // A reimportação não criou nada: desfazer não tira nada.
+    const d1 = await como(`/api/importacoes/${ultimo.id}/desfazer`, { motivo: 'Reenvio por engano' });
+    expect(d1.status).toBe(200);
+    expect(d1.body).toMatchObject({ situacao: 'desfeito', desfeitoMotivo: 'Reenvio por engano' });
+    expect((await pool.query('SELECT count(*)::int AS n FROM rede.matricula')).rows[0].n).toBe(3);
+
+    // Uma turma criada pela importação que ganhou professor fica; o resto sai.
+    const t1 = await pool.query<{ id: number }>("SELECT id FROM rede.turma WHERE nome = '1º ano A'");
+    const prof = await criarUsuario(pool, 'prof.desfazer', 'professor');
+    await pool.query("INSERT INTO rede.turma_professor (turma_id, usuario_id, papel) VALUES ($1, $2, 'regente')", [t1.rows[0]!.id, prof]);
+
+    const d2 = await como(`/api/importacoes/${primeiro.id}/desfazer`, { motivo: 'Planilha errada' });
+    expect(d2.status).toBe(200);
+    const conta = async (t: string) => (await pool.query(`SELECT count(*)::int AS n FROM rede.${t}`)).rows[0].n;
+    expect(await conta('matricula')).toBe(0);
+    expect(await conta('estudante')).toBe(0);
+    expect((await pool.query('SELECT nome FROM rede.turma')).rows).toEqual([{ nome: '1º ano A' }]);
+    expect((await como(`/api/importacoes/${primeiro.id}/desfazer`, { motivo: 'de novo' })).status).toBe(409);
+  });
+
+  it('matrícula que mudou depois da importação impede desfazer', async () => {
+    const r = await enviar('escola_inep;turma;etapa;estudante\n11000001;4º ano A;4º ano;Estudante 20\n');
+    await como(`/api/importacoes/${r.body.id}/publicar`);
+    await pool.query("UPDATE rede.matricula SET situacao = 'abandono'");
+    const d = await como(`/api/importacoes/${r.body.id}/desfazer`, { motivo: 'teste' });
+    expect(d.status).toBe(409);
+    expect(d.body.erro).toMatch(/mudou depois da importação/);
+    expect((await pool.query('SELECT count(*)::int AS n FROM rede.matricula')).rows[0].n).toBe(1);
+  });
 });

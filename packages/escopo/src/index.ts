@@ -92,7 +92,8 @@ export type AcaoPlataforma =
   | 'rede.gerir' // escolas, anos letivos, turmas, estudantes, matrículas
   | 'turma.professores' // atribuir professores
   | 'importacao.matriculas'
-  | 'config.gerir';
+  | 'config.gerir'
+  | 'auditoria.ver'; // histórico de acessos e de acesso a dado nominal
 
 const PERMISSOES: Record<AcaoPlataforma, Perfil[]> = {
   'usuarios.ver': ['admin', 'cadastro'],
@@ -101,6 +102,7 @@ const PERMISSOES: Record<AcaoPlataforma, Perfil[]> = {
   'turma.professores': ['cadastro', 'coordenacao'],
   'importacao.matriculas': ['cadastro'],
   'config.gerir': ['admin'],
+  'auditoria.ver': ['admin'],
 };
 
 export function pode(perfil: Perfil, acao: AcaoPlataforma): boolean {

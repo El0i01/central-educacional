@@ -11,13 +11,23 @@ import { ErroHttp, paramId, rota, texto } from '../../http.js';
 import { exigir } from '../acesso/escopo.js';
 import { usuarioDa } from '../acesso/middleware.js';
 import { registrarHistorico } from '../nucleo/historico.js';
-import { conferirMatricula, importarMatricula } from '../rede/servico.js';
+import {
+  conferirMatricula,
+  desfazerMatricula,
+  ErroDesfazer,
+  importarMatricula,
+  type ResultadoImportacao,
+} from '../rede/servico.js';
 
 const MAX_LINHAS = 5000;
 
 const SELECAO_LOTE = `
   SELECT l.id, l.tipo, l.arquivo_nome AS "arquivoNome", l.ano_letivo AS "anoLetivo", l.situacao, l.resumo,
          u.nome AS "criadoPor", l.criado_em AS "criadoEm", l.publicado_em AS "publicadoEm",
+         l.desfeito_em AS "desfeitoEm", l.desfeito_motivo AS "desfeitoMotivo",
+         (l.situacao = 'publicado' AND NOT EXISTS (
+            SELECT 1 FROM importacao.lote p WHERE p.situacao = 'publicado' AND p.publicado_em > l.publicado_em
+         )) AS "podeDesfazer",
          count(x.numero)::int AS total,
          count(x.numero) FILTER (WHERE NOT x.ignorar AND x.situacao = 'nova')::int AS novas,
          count(x.numero) FILTER (WHERE NOT x.ignorar AND x.situacao = 'ja_existe')::int AS "jaExistentes",
@@ -176,6 +186,7 @@ export function rotasImportacao(deps: { pool: pg.Pool }): Router {
       const eu = usuarioDa(req);
       const id = paramId(req);
       await emTransacao(pool, async (c) => {
+        await c.query("SELECT pg_advisory_xact_lock(hashtext('importacao.publicacao'))");
         const { rows } = await c.query<{ situacao: string; ano_letivo: number }>(
           'SELECT situacao, ano_letivo FROM importacao.lote WHERE id = $1 FOR UPDATE',
           [id],
@@ -200,6 +211,7 @@ export function rotasImportacao(deps: { pool: pg.Pool }): Router {
             throw new ErroHttp(409, `A linha ${l.numero} mudou desde a prévia: ${agora.problemas.join(' ')} Envie o arquivo de novo.`);
           }
           const r = await importarMatricula(c, l.dados, lote.ano_letivo, eu.id);
+          await c.query('UPDATE importacao.linha SET resultado = $3 WHERE lote_id = $1 AND numero = $2', [id, l.numero, r]);
           if (r.matricula === 'criada') resumo.matriculasCriadas++;
           if (r.turmaCriada) resumo.turmasCriadas++;
           if (r.estudanteCriado) resumo.estudantesCriados++;
@@ -210,6 +222,56 @@ export function rotasImportacao(deps: { pool: pg.Pool }): Router {
         );
         await registrarHistorico(c, {
           modulo: 'importacao', entidade: 'lote', entidadeId: id, acao: 'publicacao', dados: resumo, usuarioId: eu.id,
+        });
+      });
+      res.json(await buscarLote(pool, id, false));
+    }),
+  );
+
+  // UC-M05: desfaz a última publicação. Só a mais recente, para não desmontar o que outra
+  // importação depois dela já usou. Motivo obrigatório: vai para o histórico.
+  rotas.post(
+    '/importacoes/:id/desfazer',
+    exigir('importacao.matriculas'),
+    rota(async (req, res) => {
+      const eu = usuarioDa(req);
+      const id = paramId(req);
+      const motivo = texto(req.body?.motivo);
+      if (!motivo) throw new ErroHttp(400, 'Diga por que a importação está sendo desfeita.');
+      await emTransacao(pool, async (c) => {
+        // Uma publicação ou desfazer de cada vez.
+        await c.query("SELECT pg_advisory_xact_lock(hashtext('importacao.publicacao'))");
+        const { rows } = await c.query<{ situacao: string; ultima: boolean }>(
+          `SELECT l.situacao, NOT EXISTS (
+                    SELECT 1 FROM importacao.lote p WHERE p.situacao = 'publicado' AND p.publicado_em > l.publicado_em
+                  ) AS ultima
+             FROM importacao.lote l WHERE l.id = $1 FOR UPDATE`,
+          [id],
+        );
+        const lote = rows[0];
+        if (!lote) throw new ErroHttp(404, 'Importação não encontrada.');
+        if (lote.situacao !== 'publicado') throw new ErroHttp(409, 'Só uma importação publicada pode ser desfeita.');
+        if (!lote.ultima) throw new ErroHttp(409, 'Há uma publicação mais recente. Desfaça primeiro a mais recente.');
+
+        const linhas = await c.query<{ resultado: ResultadoImportacao }>(
+          'SELECT resultado FROM importacao.linha WHERE lote_id = $1 AND resultado IS NOT NULL ORDER BY numero DESC',
+          [id],
+        );
+        if (linhas.rows.length === 0) {
+          throw new ErroHttp(409, 'Esta importação foi publicada antes de o sistema guardar o que cada linha fez. Desfaça à mão.');
+        }
+        try {
+          for (const l of linhas.rows) await desfazerMatricula(c, l.resultado, eu.id, id);
+        } catch (erro) {
+          if (erro instanceof ErroDesfazer) throw new ErroHttp(409, erro.message);
+          throw erro;
+        }
+        await c.query(
+          `UPDATE importacao.lote SET situacao = 'desfeito', desfeito_por = $2, desfeito_em = now(), desfeito_motivo = $3 WHERE id = $1`,
+          [id, eu.id, motivo],
+        );
+        await registrarHistorico(c, {
+          modulo: 'importacao', entidade: 'lote', entidadeId: id, acao: 'desfeito', motivo, usuarioId: eu.id,
         });
       });
       res.json(await buscarLote(pool, id, false));

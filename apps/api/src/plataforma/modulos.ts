@@ -1,10 +1,14 @@
 // Registro de módulos: a API se monta a partir dos módulos ligados (docs/modulos.md, seção 1).
 // A plataforma não importa nada de modulos/: recebe a lista de registros em criarApp.
 
-import type { CodigoModulo, ModuloAtivo, Perfil } from '@central/tipos';
+import type { CodigoModulo, ModuloAtivo, ModuloConfig, Perfil } from '@central/tipos';
 import { Router } from 'express';
 import type pg from 'pg';
+import { emTransacao } from '../banco.js';
+import { ErroHttp, param, rota, texto } from '../http.js';
+import { exigir } from './acesso/escopo.js';
 import { usuarioDa } from './acesso/middleware.js';
+import { registrarHistorico } from './nucleo/historico.js';
 
 export interface ContextoModulo {
   pool: pg.Pool;
@@ -46,6 +50,57 @@ export function montarModulos(registros: RegistroModulo[], ctx: ContextoModulo):
       .map(({ codigo, nome, caminho, perfis }) => ({ codigo, nome, caminho, perfis }));
     res.json(lista);
   });
+
+  // UC-A08: o admin liga e desliga módulos. Vale no próximo pedido, sem reiniciar a API.
+  // Desligar não apaga nada: o schema do módulo fica intacto e volta igual ao religar.
+  rotas.get(
+    '/config/modulos',
+    exigir('config.gerir'),
+    rota(async (_req, res) => {
+      const ativos = await lerModulosAtivos(ctx.pool);
+      const lista: ModuloConfig[] = registros.map(({ codigo, nome, caminho, perfis }) => ({
+        codigo, nome, caminho, perfis, ativo: ativos.has(codigo),
+      }));
+      res.json(lista);
+    }),
+  );
+
+  rotas.put(
+    '/config/modulos/:codigo',
+    exigir('config.gerir'),
+    rota(async (req, res) => {
+      const eu = usuarioDa(req);
+      const codigo = param(req, 'codigo');
+      const modulo = registros.find((m) => m.codigo === codigo);
+      if (!modulo) throw new ErroHttp(404, 'Módulo não encontrado.');
+      const ativo = req.body?.ativo;
+      if (typeof ativo !== 'boolean') throw new ErroHttp(400, 'Informe se o módulo fica ligado ou desligado.');
+      const motivo = texto(req.body?.motivo);
+      if (!ativo && !motivo) throw new ErroHttp(400, 'Diga por que o módulo está sendo desligado.');
+
+      await emTransacao(ctx.pool, async (c) => {
+        const { rows } = await c.query<{ valor: unknown }>(
+          "SELECT valor FROM nucleo.config WHERE chave = 'modulos_ativos' FOR UPDATE",
+        );
+        const atual = new Set(Array.isArray(rows[0]?.valor) ? (rows[0]!.valor as string[]) : []);
+        if (atual.has(codigo) === ativo) return;
+        if (ativo) atual.add(codigo);
+        else atual.delete(codigo);
+        await c.query(
+          `UPDATE nucleo.config SET valor = $1, atualizado_em = now(), atualizado_por = $2 WHERE chave = 'modulos_ativos'`,
+          [JSON.stringify([...atual].sort()), eu.id],
+        );
+        await registrarHistorico(c, {
+          modulo: 'nucleo', entidade: 'config', entidadeId: 0,
+          acao: ativo ? 'modulo_ligado' : 'modulo_desligado', motivo, dados: { modulo: codigo }, usuarioId: eu.id,
+        });
+      });
+      const resposta: ModuloConfig = {
+        codigo: modulo.codigo, nome: modulo.nome, caminho: modulo.caminho, perfis: modulo.perfis, ativo,
+      };
+      res.json(resposta);
+    }),
+  );
 
   for (const modulo of registros) {
     const proprias = modulo.rotas(ctx);

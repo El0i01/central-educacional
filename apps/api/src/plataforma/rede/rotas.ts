@@ -14,6 +14,8 @@ import {
   type ProfessorTurma,
   type SituacaoMatricula,
   type TurmaDetalhe,
+  type TrajetoriaItem,
+  type TransferirPedido,
   type TurmaLista,
   type Turno,
   type Zona,
@@ -480,6 +482,78 @@ export function rotasRede(deps: { pool: pg.Pool }): Router {
         usuarioId: usuarioDa(req).id,
       });
       res.json({ id, situacao });
+    }),
+  );
+
+  // UC-R07: transferência dentro da rede. A matrícula de origem fica como "transferida" (não
+  // some) e nasce a matrícula na turma de destino, no mesmo ano letivo. Saída para fora da rede
+  // continua sendo a mudança de situação acima.
+  rotas.post(
+    '/matriculas/:id/transferir',
+    exigir('rede.gerir'),
+    rota(async (req, res) => {
+      const eu = usuarioDa(req);
+      const id = paramId(req);
+      const corpo = (req.body ?? {}) as Partial<TransferirPedido>;
+      const destino = inteiroOpcional(corpo.turmaId);
+      if (!destino) throw new ErroHttp(400, 'Escolha a turma de destino.');
+      const motivo = texto(corpo.motivo);
+
+      const resultado = await emTransacao(pool, async (c) => {
+        const { rows } = await c.query<{ situacao: string; estudante_id: number; turma_id: number; ano: number }>(
+          `SELECT m.situacao, m.estudante_id, m.turma_id, t.ano_letivo AS ano
+             FROM rede.matricula m JOIN rede.turma t ON t.id = m.turma_id WHERE m.id = $1 FOR UPDATE OF m`,
+          [id],
+        );
+        const origem = rows[0];
+        if (!origem) throw new ErroHttp(404, 'Matrícula não encontrada.');
+        if (origem.situacao !== 'ativa') throw new ErroHttp(409, 'Só uma matrícula ativa pode ser transferida.');
+        if (origem.turma_id === destino) throw new ErroHttp(400, 'O estudante já está nesta turma.');
+        const t = await c.query<{ ano: number }>('SELECT ano_letivo AS ano FROM rede.turma WHERE id = $1', [destino]);
+        if (!t.rows[0]) throw new ErroHttp(400, 'Turma de destino não encontrada.');
+        if (t.rows[0].ano !== origem.ano) {
+          throw new ErroHttp(400, 'A turma de destino é de outro ano letivo. Transferência é dentro do mesmo ano.');
+        }
+
+        await c.query("UPDATE rede.matricula SET situacao = 'transferida' WHERE id = $1", [id]);
+        // Se o estudante já passou por esta turma, a matrícula antiga volta a valer.
+        const nova = await c.query<{ id: number }>(
+          `INSERT INTO rede.matricula (estudante_id, turma_id) VALUES ($1, $2)
+           ON CONFLICT (estudante_id, turma_id) DO UPDATE SET situacao = 'ativa'
+           RETURNING id`,
+          [origem.estudante_id, destino],
+        );
+        const novaId = nova.rows[0]!.id;
+        const dados = { de: id, para: novaId, turmaOrigem: origem.turma_id, turmaDestino: destino };
+        await registrarHistorico(c, {
+          modulo: 'rede', entidade: 'matricula', entidadeId: id, acao: 'transferencia_saida', motivo, dados, usuarioId: eu.id,
+        });
+        await registrarHistorico(c, {
+          modulo: 'rede', entidade: 'matricula', entidadeId: novaId, acao: 'transferencia_entrada', motivo, dados, usuarioId: eu.id,
+        });
+        return { matriculaId: novaId, turmaId: destino };
+      });
+      res.status(201).json(resultado);
+    }),
+  );
+
+  // Trajetória do estudante na rede: todas as matrículas, de todos os anos (UC-R07).
+  // Mostra nome de escola e turma, sem dado pedagógico; vale para quem pode cadastrar.
+  rotas.get(
+    '/estudantes/:id/trajetoria',
+    exigir('rede.gerir'),
+    rota(async (req, res) => {
+      const id = paramId(req);
+      const { rows } = await pool.query<TrajetoriaItem>(
+        `SELECT m.id AS "matriculaId", t.ano_letivo AS "anoLetivo", e.nome AS escola, t.nome AS turma,
+                t.etapa, m.situacao
+           FROM rede.matricula m JOIN rede.turma t ON t.id = m.turma_id JOIN rede.escola e ON e.id = t.escola_id
+          WHERE m.estudante_id = $1
+          ORDER BY t.ano_letivo DESC, m.id DESC`,
+        [id],
+      );
+      if (rows.length === 0) throw new ErroHttp(404, 'Estudante não encontrado.');
+      res.json(rows);
     }),
   );
 

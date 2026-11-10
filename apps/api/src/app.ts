@@ -8,6 +8,7 @@ import { repositorioUsuarios } from './plataforma/acesso/usuarios.js';
 import { montarModulos, type RegistroModulo } from './plataforma/modulos.js';
 import { rotasImportacao } from './plataforma/importacao/rotas.js';
 import { rotasRede } from './plataforma/rede/rotas.js';
+import { rotasAuditoria } from './plataforma/nucleo/rotas.js';
 
 export interface Dependencias {
   pool: pg.Pool;
@@ -70,6 +71,7 @@ export function criarApp(deps: Dependencias): express.Express {
   app.use('/api', rotasGestaoUsuarios({ pool: deps.pool }));
   app.use('/api', rotasRede({ pool: deps.pool }));
   app.use('/api', rotasImportacao({ pool: deps.pool }));
+  app.use('/api', rotasAuditoria({ pool: deps.pool }));
   app.use('/api', montarModulos(deps.modulos, { pool: deps.pool }));
 
   app.use('/api', (_req, res) => {

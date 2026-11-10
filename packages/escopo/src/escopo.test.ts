@@ -75,6 +75,8 @@ describe('escrita na plataforma', () => {
     expect(pode('professor', 'turma.professores')).toBe(false);
     expect(pode('admin', 'config.gerir')).toBe(true);
     expect(pode('cadastro', 'config.gerir')).toBe(false);
+    expect(pode('admin', 'auditoria.ver')).toBe(true);
+    expect(pode('gestor', 'auditoria.ver')).toBe(false);
   });
 
   it('cadastro só cria contas da escola; admin cria qualquer perfil', () => {
