@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { BotaoTema } from '../componentes/BotaoTema';
 import { useSessao } from '../sessao';
 
 /** Senha provisória: até trocar, a API só libera /eu e /eu/senha (UC-A02). */
@@ -28,7 +29,8 @@ export function TrocarSenha() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4 py-12">
+    <main className="relative flex min-h-dvh items-center justify-center px-4 py-12">
+      <BotaoTema className="absolute top-3 right-3" />
       <form onSubmit={enviar} className="grid w-full max-w-sm gap-5">
         <div>
           <h1 className="text-2xl font-semibold">Crie sua senha</h1>

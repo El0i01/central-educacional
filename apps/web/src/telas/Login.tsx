@@ -1,5 +1,6 @@
 import { LoaderCircle, LogIn } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { BotaoTema } from '../componentes/BotaoTema';
 import { useSessao } from '../sessao';
 
 export function Login() {
@@ -24,7 +25,8 @@ export function Login() {
   }
 
   return (
-    <main className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
+    <main className="relative grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
+      <BotaoTema className="absolute top-[max(12px,env(safe-area-inset-top))] right-3" />
       <section className="hidden flex-col justify-center gap-6 bg-semed-claro px-[11%] py-16 lg:flex">
         <img src="/semed.png" alt="Logo da SEMED de Itapuã do Oeste" width={96} height={96} className="rounded-xl" />
         <p className="font-mono text-xs tracking-widest text-semed uppercase">Educação municipal</p>

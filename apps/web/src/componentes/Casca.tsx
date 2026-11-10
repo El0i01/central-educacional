@@ -2,6 +2,7 @@ import { ROTULO_PERFIL, type ModuloAtivo } from '@central/tipos';
 import { ClipboardList, House, LogOut, type LucideIcon } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useSessao } from '../sessao';
+import { BotaoTema } from './BotaoTema';
 
 // Ícone de cada módulo no menu. Módulo novo ganha o seu aqui.
 const ICONES: Record<string, LucideIcon> = { fleo: ClipboardList };
@@ -57,6 +58,7 @@ export function Casca({ modulos }: { modulos: ModuloAtivo[] }) {
             <p className="truncate text-sm font-semibold">{usuario?.nome}</p>
             <p className="truncate text-xs text-tinta-suave">{usuario && ROTULO_PERFIL[usuario.perfil]}</p>
           </div>
+          <BotaoTema />
           <button type="button" className="ce-botao ce-botao-discreto px-3" onClick={sair} aria-label="Sair da central">
             <LogOut size={18} aria-hidden />
           </button>
@@ -68,9 +70,12 @@ export function Casca({ modulos }: { modulos: ModuloAtivo[] }) {
           <img src="/semed.png" alt="" width={36} height={36} className="rounded-md" />
           <span className="font-display font-semibold">Central Educacional</span>
         </div>
-        <button type="button" className="ce-botao ce-botao-discreto px-3" onClick={sair} aria-label="Sair da central">
-          <LogOut size={18} aria-hidden />
-        </button>
+        <div className="flex items-center gap-1">
+          <BotaoTema />
+          <button type="button" className="ce-botao ce-botao-discreto px-3" onClick={sair} aria-label="Sair da central">
+            <LogOut size={18} aria-hidden />
+          </button>
+        </div>
       </header>
 
       <main id="conteudo" className="mx-auto max-w-[1200px] px-4 pt-6 pb-28 lg:px-10 lg:pt-10 lg:pb-12">

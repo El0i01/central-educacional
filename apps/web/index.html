@@ -7,6 +7,13 @@
     <meta name="theme-color" content="#0f1522" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/semed.png" type="image/png" />
     <title>Central Educacional · SEMED Itapuã do Oeste</title>
+    <script>
+      // Tema escolhido neste aparelho, aplicado antes de desenhar (sem piscar o tema errado).
+      try {
+        var t = localStorage.getItem('central.tema');
+        if (t === 'claro' || t === 'escuro') document.documentElement.dataset.tema = t;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="raiz"></div>
