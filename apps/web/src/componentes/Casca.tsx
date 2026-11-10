@@ -1,6 +1,6 @@
 import { pode } from '@central/escopo';
 import { ROTULO_PERFIL, type ModuloAtivo, type Usuario } from '@central/tipos';
-import { ClipboardList, House, LogOut, School, Upload, Users, type LucideIcon } from 'lucide-react';
+import { ClipboardList, History, House, LogOut, Puzzle, School, Upload, Users, type LucideIcon } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useSessao } from '../sessao';
 import { BotaoTema } from './BotaoTema';
@@ -16,6 +16,8 @@ function itensPlataforma(u: Usuario): { caminho: string; nome: string; Icone: Lu
   }
   if (pode(u.perfil, 'usuarios.ver')) itens.push({ caminho: '/usuarios', nome: 'Usuários', Icone: Users });
   if (pode(u.perfil, 'importacao.matriculas')) itens.push({ caminho: '/importacao', nome: 'Importação', Icone: Upload });
+  if (pode(u.perfil, 'config.gerir')) itens.push({ caminho: '/config/modulos', nome: 'Módulos', Icone: Puzzle });
+  if (pode(u.perfil, 'auditoria.ver')) itens.push({ caminho: '/acessos', nome: 'Acessos', Icone: History });
   return itens;
 }
 

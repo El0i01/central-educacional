@@ -5,6 +5,8 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { chamar } from './api';
 import { Casca } from './componentes/Casca';
 import { useSessao } from './sessao';
+import { Acessos } from './telas/admin/Acessos';
+import { Modulos } from './telas/admin/Modulos';
 import { Inicio } from './telas/Inicio';
 import { Importacoes, LoteImportacaoTela } from './telas/importacao/Importacoes';
 import { Login } from './telas/Login';
@@ -64,6 +66,8 @@ export function App() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="importacao" element={<Importacoes />} />
         <Route path="importacao/:id" element={<LoteImportacaoTela />} />
+        <Route path="config/modulos" element={<Modulos />} />
+        <Route path="acessos" element={<Acessos />} />
         {modulos.map((m) => (
           <Route key={m.codigo} path={`${m.caminho}/*`} element={<EmConstrucao modulo={m} />} />
         ))}

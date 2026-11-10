@@ -1,8 +1,8 @@
-// Importação de matrículas (UC-M01 a M04): enviar planilha, ver a prévia, publicar.
+// Importação de matrículas (UC-M01 a M05): enviar planilha, ver a prévia, publicar.
 
 import { MODELO_MATRICULAS } from '@central/importacao';
 import { ROTULO_ETAPA, ROTULO_SITUACAO_LOTE, type AnoLetivo, type LoteImportacao, type SituacaoLote } from '@central/tipos';
-import { ArrowLeft, ChevronRight, Download, Upload } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Download, Undo2, Upload } from 'lucide-react';
 import { useState, type ChangeEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { chamar } from '../../api';
@@ -13,6 +13,7 @@ const TOM: Record<SituacaoLote, 'rascunho' | 'enviada' | 'devolvida' | 'validada
   pronto: 'enviada',
   publicado: 'validada',
   descartado: 'rascunho',
+  desfeito: 'rascunho',
 };
 
 function baixarModelo() {
@@ -142,6 +143,8 @@ export function LoteImportacaoTela() {
   const [erro, setErro] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [confirmarDescarte, setConfirmarDescarte] = useState(false);
+  const [desfazendo, setDesfazendo] = useState(false);
+  const [motivo, setMotivo] = useState('');
 
   async function acao(fn: () => Promise<LoteImportacao>) {
     setOcupado(true);
@@ -189,6 +192,41 @@ export function LoteImportacaoTela() {
         <Aviso tom="sucesso" titulo={`Publicado em ${dataHoraBr(l.publicadoEm)}`}>
           {l.resumo.matriculasCriadas} matrículas, {l.resumo.turmasCriadas} turmas e {l.resumo.estudantesCriados} estudantes criados.
         </Aviso>
+      )}
+      {l.situacao === 'desfeito' && (
+        <Aviso tom="info" titulo={`Desfeita em ${dataHoraBr(l.desfeitoEm)}`}>
+          As matrículas criadas por esta planilha saíram da rede. Motivo: {l.desfeitoMotivo}
+        </Aviso>
+      )}
+
+      {l.podeDesfazer && !desfazendo && (
+        <button type="button" className="ce-botao ce-botao-secundario justify-self-start" onClick={() => setDesfazendo(true)}>
+          <Undo2 size={18} aria-hidden /> Desfazer esta publicação
+        </button>
+      )}
+      {l.podeDesfazer && desfazendo && (
+        <form
+          className="grid gap-3 rounded-xl border border-linha bg-superficie p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void acao(() => chamar(`/importacoes/${l.id}/desfazer`, { json: { motivo } }));
+          }}
+        >
+          <p>
+            Desfazer remove as matrículas que esta planilha criou e as turmas e estudantes que ficarem sem uso.
+            Matrículas que já existiam voltam como estavam. Se alguma ficha já foi aberta para esses estudantes, nada é desfeito.
+          </p>
+          <Campo id="desfazer-motivo" rotulo="Motivo" ajuda="Vai para o histórico.">
+            <input id="desfazer-motivo" name="motivo" className="ce-controle" required value={motivo}
+              onChange={(e) => setMotivo(e.target.value)} placeholder="Ex.: planilha da escola errada…" />
+          </Campo>
+          <div className="flex flex-wrap gap-2">
+            <button type="submit" className="ce-botao ce-botao-perigo" disabled={ocupado || !motivo.trim()}>
+              {ocupado ? 'Desfazendo…' : 'Desfazer publicação'}
+            </button>
+            <button type="button" className="ce-botao ce-botao-discreto" onClick={() => setDesfazendo(false)}>Cancelar</button>
+          </div>
+        </form>
       )}
       {erro && <Aviso tom="erro">{erro}</Aviso>}
 

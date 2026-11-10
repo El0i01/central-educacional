@@ -46,7 +46,7 @@ export function Inicio({ modulos }: { modulos: ModuloAtivo[] }) {
         ) : (
           <div className="rounded-xl border border-linha bg-superficie p-6 text-tinta-suave">
             {usuario.perfil === 'admin'
-              ? 'O administrador cuida de usuários e configuração, sem dados pedagógicos. Use "Usuários" no menu.'
+              ? 'O administrador cuida de usuários, módulos e histórico de acessos, sem dados pedagógicos. Use o menu.'
               : 'Nenhum módulo ligado para o seu perfil. A rede escolar está em "Escolas e turmas".'}
           </div>
         )}

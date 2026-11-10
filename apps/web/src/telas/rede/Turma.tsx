@@ -5,10 +5,13 @@ import {
   ROTULO_SITUACAO_MATRICULA,
   type PossivelDuplicado,
   type ProfessorTurma,
+  type MatriculaTurma,
   type SituacaoMatricula,
+  type TrajetoriaItem,
   type TurmaDetalhe,
+  type TurmaLista,
 } from '@central/tipos';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRightLeft, Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { chamar, ErroApi } from '../../api';
@@ -190,10 +193,92 @@ function Matricular({ turmaId, aoMatricular }: { turmaId: number; aoMatricular: 
   );
 }
 
+/** UC-R07: transferir para outra turma da rede, no mesmo ano letivo. A matrícula de origem fica
+ * como "transferida" e a trajetória mostra todas as matrículas do estudante. */
+function Transferir({ turma, matricula, aoFechar, aoTransferir }: {
+  turma: TurmaDetalhe;
+  matricula: MatriculaTurma;
+  aoFechar: () => void;
+  aoTransferir: () => void;
+}) {
+  const turmas = useDados(() => chamar<TurmaLista[]>(`/turmas?ano=${turma.anoLetivo}`), [turma.anoLetivo]);
+  const trajetoria = useDados(() => chamar<TrajetoriaItem[]>(`/estudantes/${matricula.estudanteId}/trajetoria`), [matricula.estudanteId]);
+  const [destino, setDestino] = useState<number | ''>('');
+  const [motivo, setMotivo] = useState('');
+  const [erro, setErro] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+
+  const opcoes = (turmas.dados ?? []).filter((x) => x.id !== turma.id);
+  const porEscola = new Map<string, TurmaLista[]>();
+  for (const x of opcoes) porEscola.set(x.escola, [...(porEscola.get(x.escola) ?? []), x]);
+
+  async function enviar(e: FormEvent) {
+    e.preventDefault();
+    if (!destino) return;
+    setOcupado(true);
+    setErro('');
+    try {
+      await chamar(`/matriculas/${matricula.id}/transferir`, { json: { turmaId: destino, motivo: motivo || null } });
+      aoTransferir();
+    } catch (e2) {
+      setErro((e2 as Error).message);
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  return (
+    <form onSubmit={enviar} className="ce-painel grid gap-4" aria-labelledby="transferir-titulo">
+      <h2 id="transferir-titulo" className="text-lg font-medium">Transferir {matricula.nome}</h2>
+      <p className="text-tinta-suave">
+        A matrícula nesta turma fica registrada como transferida e o estudante passa para a turma escolhida, no ano letivo {turma.anoLetivo}.
+        Para saída da rede, mude a situação na tabela para “Transferida”.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Campo id="transf-destino" rotulo="Turma de destino">
+          <select id="transf-destino" className="ce-controle" required value={destino}
+            onChange={(e) => setDestino(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">{turmas.dados ? 'Escolha a turma…' : 'Carregando…'}</option>
+            {[...porEscola].map(([escola, lista]) => (
+              <optgroup key={escola} label={escola}>
+                {lista.map((x) => <option key={x.id} value={x.id}>{x.nome} · {ROTULO_ETAPA[x.etapa]}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </Campo>
+        <Campo id="transf-motivo" rotulo="Motivo (opcional)" ajuda="Vai para o histórico.">
+          <input id="transf-motivo" className="ce-controle" value={motivo} onChange={(e) => setMotivo(e.target.value)}
+            placeholder="Ex.: mudança de endereço…" />
+        </Campo>
+      </div>
+      {trajetoria.dados && trajetoria.dados.length > 1 && (
+        <div className="grid gap-2">
+          <h3 className="font-medium">Trajetória na rede</h3>
+          <ul className="grid gap-1 text-sm">
+            {trajetoria.dados.map((x) => (
+              <li key={x.matriculaId} className="ce-num">
+                {x.anoLetivo} · {x.escola} · {x.turma} · {ROTULO_SITUACAO_MATRICULA[x.situacao]}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {erro && <Aviso tom="erro">{erro}</Aviso>}
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" className="ce-botao ce-botao-primario" disabled={ocupado || !destino}>
+          {ocupado ? 'Transferindo…' : 'Transferir'}
+        </button>
+        <button type="button" className="ce-botao ce-botao-discreto" onClick={aoFechar}>Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
 export function Turma() {
   const { id } = useParams();
   const turma = useDados(() => chamar<TurmaDetalhe>(`/turmas/${id}`), [id]);
   const [erroSituacao, setErroSituacao] = useState('');
+  const [transferindo, setTransferindo] = useState<MatriculaTurma | null>(null);
 
   async function mudarSituacao(matriculaId: number, situacao: SituacaoMatricula) {
     setErroSituacao('');
@@ -228,7 +313,7 @@ export function Turma() {
         ) : (
           <div className="ce-tabela-caixa">
             <table className="ce-tabela">
-              <thead><tr><th>Estudante</th><th>Nascimento</th><th>ID INEP</th><th>Situação</th></tr></thead>
+              <thead><tr><th>Estudante</th><th>Nascimento</th><th>ID INEP</th><th>Situação</th>{t.pode.matricular && <th><span className="sr-only">Ações</span></th>}</tr></thead>
               <tbody>
                 {t.matriculas.map((m) => (
                   <tr key={m.id} className={m.situacao === 'ativa' ? '' : 'ce-linha-apagada'}>
@@ -245,6 +330,16 @@ export function Turma() {
                         ROTULO_SITUACAO_MATRICULA[m.situacao]
                       )}
                     </td>
+                    {t.pode.matricular && (
+                      <td>
+                        {m.situacao === 'ativa' && (
+                          <button type="button" className="ce-botao ce-botao-discreto py-1" onClick={() => setTransferindo(m)}
+                            aria-label={`Transferir ${m.nome} para outra turma`}>
+                            <ArrowRightLeft size={16} aria-hidden /> Transferir
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -253,6 +348,19 @@ export function Turma() {
         )}
         {erroSituacao && <Aviso tom="erro">{erroSituacao}</Aviso>}
       </section>
+
+      {transferindo && (
+        <Transferir
+          key={transferindo.id}
+          turma={t}
+          matricula={transferindo}
+          aoFechar={() => setTransferindo(null)}
+          aoTransferir={() => {
+            setTransferindo(null);
+            void turma.recarregar();
+          }}
+        />
+      )}
 
       {t.pode.matricular && <Matricular turmaId={t.id} aoMatricular={() => void turma.recarregar()} />}
     </Pagina>
