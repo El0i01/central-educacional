@@ -51,3 +51,42 @@ h3 {
   font-family: var(--font-titulo);
   text-wrap: balance;
 }
+
+/* Tabela (base do futuro componente Tabela de @central/ui, docs/design-system.md). */
+.ce-tabela-caixa {
+  overflow-x: auto;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-lg);
+  background: var(--superficie);
+}
+.ce-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.ce-tabela th {
+  text-align: left;
+  font: 600 13px/18px var(--font-texto);
+  letter-spacing: 0.02em;
+  color: var(--tinta-suave);
+  background: var(--superficie-2);
+  padding: 10px 14px;
+  white-space: nowrap;
+}
+.ce-tabela td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--linha);
+  vertical-align: middle;
+}
+.ce-tabela tr.ce-linha-apagada td {
+  color: var(--tinta-suave);
+}
+.ce-painel {
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-lg);
+  padding: var(--espaco-6);
+}
+select.ce-controle {
+  appearance: auto;
+}

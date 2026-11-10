@@ -95,6 +95,17 @@ export function rotasRede(deps: { pool: pg.Pool }): Router {
     }),
   );
 
+  // Só id e nome, para vincular usuários a escolas: quem gerencia contas (inclusive o admin, que
+  // não enxerga a rede) precisa da lista. Nenhum dado de estudante.
+  rotas.get(
+    '/escolas/opcoes',
+    exigir('usuarios.ver'),
+    rota(async (_req, res) => {
+      const { rows } = await pool.query('SELECT id, nome, ativa FROM rede.escola ORDER BY nome');
+      res.json(rows);
+    }),
+  );
+
   function lerEscola(corpo: Record<string, unknown>, atual?: Escola) {
     const nome = corpo.nome === undefined && atual ? atual.nome : texto(corpo.nome);
     if (!nome) throw new ErroHttp(400, 'Informe o nome da escola.');

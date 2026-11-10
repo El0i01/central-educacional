@@ -1,11 +1,23 @@
-import { ROTULO_PERFIL, type ModuloAtivo } from '@central/tipos';
-import { ClipboardList, House, LogOut, type LucideIcon } from 'lucide-react';
+import { pode } from '@central/escopo';
+import { ROTULO_PERFIL, type ModuloAtivo, type Usuario } from '@central/tipos';
+import { ClipboardList, House, LogOut, School, Upload, Users, type LucideIcon } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useSessao } from '../sessao';
 import { BotaoTema } from './BotaoTema';
 
 // Ícone de cada módulo no menu. Módulo novo ganha o seu aqui.
 const ICONES: Record<string, LucideIcon> = { fleo: ClipboardList };
+
+/** Itens da plataforma (sempre ligada), conforme o perfil. */
+function itensPlataforma(u: Usuario): { caminho: string; nome: string; Icone: LucideIcon }[] {
+  const itens: { caminho: string; nome: string; Icone: LucideIcon }[] = [];
+  if (u.perfil !== 'admin') {
+    itens.push({ caminho: '/rede', nome: u.perfil === 'professor' ? 'Minhas turmas' : 'Escolas e turmas', Icone: School });
+  }
+  if (pode(u.perfil, 'usuarios.ver')) itens.push({ caminho: '/usuarios', nome: 'Usuários', Icone: Users });
+  if (pode(u.perfil, 'importacao.matriculas')) itens.push({ caminho: '/importacao', nome: 'Importação', Icone: Upload });
+  return itens;
+}
 
 /**
  * Casca da central: menu lateral (web) ou barra inferior (celular) montados pelos módulos ligados
@@ -15,6 +27,7 @@ export function Casca({ modulos }: { modulos: ModuloAtivo[] }) {
   const { usuario, sair } = useSessao();
   const itens = [
     { caminho: '/', nome: 'Início', Icone: House },
+    ...(usuario ? itensPlataforma(usuario) : []),
     ...modulos.map((m) => ({ caminho: m.caminho, nome: m.nome, Icone: ICONES[m.codigo] ?? ClipboardList })),
   ];
   const iniciais = (usuario?.nome ?? '')

@@ -20,7 +20,7 @@ export function Inicio({ modulos }: { modulos: ModuloAtivo[] }) {
       </div>
 
       <div className="ce-aviso ce-aviso-info" role="status">
-        Ambiente de desenvolvimento, Fase 0. Somente dados fictícios.
+        Ambiente de desenvolvimento. Somente dados fictícios.
       </div>
 
       <section className="grid gap-4">
@@ -46,8 +46,8 @@ export function Inicio({ modulos }: { modulos: ModuloAtivo[] }) {
         ) : (
           <div className="rounded-xl border border-linha bg-superficie p-6 text-tinta-suave">
             {usuario.perfil === 'admin'
-              ? 'O administrador cuida de usuários e configuração, sem dados pedagógicos. As telas de usuários entram na Fase 1.'
-              : 'Nenhum módulo ligado para o seu perfil. Fale com a SEMED.'}
+              ? 'O administrador cuida de usuários e configuração, sem dados pedagógicos. Use "Usuários" no menu.'
+              : 'Nenhum módulo ligado para o seu perfil. A rede escolar está em "Escolas e turmas".'}
           </div>
         )}
       </section>

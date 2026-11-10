@@ -7,6 +7,8 @@ export class ErroApi extends Error {
     public status: number,
     mensagem: string,
     public codigo?: string,
+    /** Corpo completo da resposta de erro (ex.: lista de prováveis duplicados). */
+    public extra?: Record<string, unknown>,
   ) {
     super(mensagem);
   }
@@ -60,7 +62,7 @@ export async function chamar<T>(
   }
   const corpo = (res.headers.get('content-type') ?? '').includes('json') ? await res.json() : null;
   if (!res.ok) {
-    throw new ErroApi(res.status, corpo?.erro ?? `Erro ${res.status} no servidor.`, corpo?.codigo);
+    throw new ErroApi(res.status, corpo?.erro ?? `Erro ${res.status} no servidor.`, corpo?.codigo, corpo ?? undefined);
   }
   return corpo as T;
 }

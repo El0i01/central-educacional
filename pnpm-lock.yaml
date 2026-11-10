@@ -90,6 +90,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@central/escopo':
+        specifier: workspace:^
+        version: link:../../packages/escopo
+      '@central/importacao':
+        specifier: workspace:^
+        version: link:../../packages/importacao
       '@fontsource/ibm-plex-mono':
         specifier: ^5.3.0
         version: 5.3.0

@@ -6,7 +6,11 @@ import { chamar } from './api';
 import { Casca } from './componentes/Casca';
 import { useSessao } from './sessao';
 import { Inicio } from './telas/Inicio';
+import { Importacoes, LoteImportacaoTela } from './telas/importacao/Importacoes';
 import { Login } from './telas/Login';
+import { Rede } from './telas/rede/Rede';
+import { Turma } from './telas/rede/Turma';
+import { Usuarios } from './telas/usuarios/Usuarios';
 import { TrocarSenha } from './telas/TrocarSenha';
 
 function Carregando() {
@@ -55,6 +59,11 @@ export function App() {
     <Routes>
       <Route element={<Casca modulos={modulos} />}>
         <Route index element={<Inicio modulos={modulos} />} />
+        <Route path="rede" element={<Rede />} />
+        <Route path="rede/turmas/:id" element={<Turma />} />
+        <Route path="usuarios" element={<Usuarios />} />
+        <Route path="importacao" element={<Importacoes />} />
+        <Route path="importacao/:id" element={<LoteImportacaoTela />} />
         {modulos.map((m) => (
           <Route key={m.codigo} path={`${m.caminho}/*`} element={<EmConstrucao modulo={m} />} />
         ))}

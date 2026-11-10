@@ -10,6 +10,8 @@
     "test": "tsc --noEmit"
   },
   "dependencies": {
+    "@central/escopo": "workspace:^",
+    "@central/importacao": "workspace:^",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/lexend": "^5.2.0",
     "@fontsource/source-sans-3": "^5.2.0",

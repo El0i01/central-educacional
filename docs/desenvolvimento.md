@@ -103,6 +103,21 @@ Ordem sugerida, cada item um commit:
 
 Depois da Fase 0, a Fase 1 (plataforma: acesso, rede, importação) segue o CLAUDE.md, seção 10.
 
+## 5. Fase 1: plataforma (situação)
+
+| Bloco | Casos de uso | Situação |
+|---|---|---|
+| `packages/escopo` (quem enxerga e escreve o quê) | regra 8 do CLAUDE.md | ✔ feito, 11 testes |
+| Usuários e vínculos (API + tela "Usuários") | UC-A04, A05, A06 | ✔ feito |
+| Rede escolar (API + telas "Escolas e turmas" e turma) | UC-R01 a R05, R08, R09 | ✔ feito |
+| Importação de matrículas (API + tela "Importação") | UC-M01 a M04 | ✔ feito, 7 + 7 testes |
+| Dados fictícios (`pnpm semear`) | — | ✔ feito |
+| Transferência com histórico entre escolas | UC-R07 | parcial: muda a situação da matrícula; falta o fluxo "transferir para" |
+| Histórico de acessos e acesso nominal (tela) | UC-A07 | a fazer (os registros já são gravados) |
+| Ligar e desligar módulos (tela) | UC-A08 | a fazer (hoje direto em `nucleo.config`) |
+| Desfazer a última importação | UC-M05 | a fazer |
+| Arquivos por hash, backup diário | UC-X04, X06 | a fazer (junto com o deploy) |
+
 ### shadcn no monorepo
 
 `packages/ui` tem o `components.json` com os aliases do pacote (`@central/ui/componentes`,
