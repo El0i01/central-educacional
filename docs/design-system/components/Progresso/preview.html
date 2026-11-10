@@ -1,0 +1,14 @@
+<!-- @dsCard group="Dados" height=80 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Progresso — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('raiz')).render(h('div', { style: { width: '100%', maxWidth: '360px' } },
+    h(C.Progresso, { valor: 4, total: 6, rotulo: 'Fichas validadas' })));
+</script>
+</body>
+</html>

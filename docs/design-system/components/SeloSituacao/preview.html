@@ -1,0 +1,14 @@
+<!-- @dsCard group="Situação" height=64 subtitle="Situação da ficha FLEO" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>SeloSituacao — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('raiz')).render(h(React.Fragment, null,
+    ['rascunho','enviada','devolvida','validada'].map(function (s) { return h(C.SeloSituacao, { key: s, situacao: s }); })));
+</script>
+</body>
+</html>

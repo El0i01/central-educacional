@@ -1,0 +1,14 @@
+<!-- @dsCard group="Dados" height=330 subtitle="Turma com andamento das fichas" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>CartaoTurma — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('raiz')).render(h('div', { style: { width: '100%', maxWidth: '340px' } },
+    h(C.CartaoTurma, { nome: '2º ano A', etapa: 'EF2 · matutino', escola: 'Escola Demonstrativa A', estudantes: 24, enviadas: 6, validadas: 15, href: '#turma-2a' })));
+</script>
+</body>
+</html>

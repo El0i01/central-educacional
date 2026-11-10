@@ -1,0 +1,18 @@
+<!-- @dsCard group="Formulário" height=210 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Campo — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  var r = ReactDOM.createRoot(document.getElementById('raiz'));
+  r.render(h('div', { style: { display: 'grid', gap: '20px', width: '100%', maxWidth: '420px' } },
+    h(C.Campo, { id: 'presenca', rotulo: 'Situação do acompanhamento', ajuda: 'Ausente e não avaliado não recebem resultado de aprendizagem.' },
+      h('select', { defaultValue: 'presente' }, h('option', { value: 'presente' }, 'Estudante acompanhado'), h('option', { value: 'ausente' }, 'Ausente'), h('option', { value: 'nao_avaliado' }, 'Não avaliado'))),
+    h(C.Campo, { id: 'orientacao', rotulo: 'Orientação para ajuste', erro: 'Informe a orientação para devolver a ficha.' },
+      h('textarea', { rows: 2 }))));
+</script>
+</body>
+</html>

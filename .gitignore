@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+
+# Segredos e dados (CLAUDE.md, seção 9)
+.env
+.env.*
+!.env.example
+*.dump
+*.backup
+*.bak
+*.sql.gz
+
+# Dados de estudantes (LGPD): planilhas e exportações com nome real nunca entram no repositório
+storage/
+*.zip
+*.csv
+*.xls
+*.xlsx
+*.ods
+
+.DS_Store
+.vscode/
+.idea/

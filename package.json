@@ -1,0 +1,28 @@
+{
+  "name": "central-educacional",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r --workspace-concurrency=1 test",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "migrar": "pnpm --filter @central/database migrar",
+    "semear": "pnpm --filter @central/database semear",
+    "dev:api": "pnpm --filter @central/api dev",
+    "dev:web": "pnpm --filter @central/web dev"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^3.2.7"
+  },
+  "type": "module"
+}

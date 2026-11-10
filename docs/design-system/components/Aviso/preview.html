@@ -1,0 +1,17 @@
+<!-- @dsCard group="Mensagens" height=250 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Aviso — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('raiz')).render(h('div', { style: { display: 'grid', gap: '10px', width: '100%', maxWidth: '560px' } },
+    h(C.Aviso, { tom: 'info' }, 'Ficha de exemplo para desenvolvimento. Os critérios oficiais entram depois da validação pela secretaria.'),
+    h(C.Aviso, { tom: 'erro', titulo: 'Orientação da coordenação' }, 'Confira o registro de escrita: o estudante já escreve frases curtas.'),
+    h(C.Aviso, { tom: 'atencao' }, 'O período de preenchimento termina em 3 dias.'),
+    h(C.Aviso, { tom: 'sucesso' }, 'Ficha enviada à coordenação.')));
+</script>
+</body>
+</html>

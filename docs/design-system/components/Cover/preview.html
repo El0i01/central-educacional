@@ -1,0 +1,51 @@
+<!-- @dsCard height=320 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Capa</title>
+<style>
+  html, body { margin: 0; background: var(--fundo); }
+  .capa { width: 960px; height: 320px; position: relative; overflow: hidden; background: var(--fundo); }
+  .faixa { position: absolute; left: 0; top: 0; }
+  .semed { fill: var(--semed); }
+  .semed-escuro { fill: var(--semed-escuro); }
+  .semed-claro { fill: var(--semed-claro); }
+  .pagina-clara { fill: var(--semed-claro); }
+  .pagina-semed { fill: var(--semed); }
+  .r-lg { rx: var(--raio-lg); }
+  .texto { position: absolute; left: 40px; top: 140px; }
+  .nome {
+    margin: 0; font-family: var(--font-titulo); font-weight: 600; font-size: 64px; line-height: .95;
+    color: var(--tinta); letter-spacing: -0.01em;
+  }
+  .lema { margin: 16px 0 0; font-family: var(--font-texto); font-size: 14px; line-height: 20px; color: var(--tinta-suave); max-width: 440px; }
+</style></head>
+<body>
+<div class="capa">
+  <svg class="faixa" width="960" height="112" viewBox="0 0 960 112" aria-hidden="true">
+    <!--
+      blocos: semed 416x112 (13 x espaco-8), semed-claro 256x112, semed-escuro 96x112, semed 144x112 sangrando à direita
+      arranjo: faixa de blocos desiguais no topo (nome longo demais para a zona lateral), vãos de espaco-4
+      padrão: livro aberto da logo (linha "motivo literal"), duas páginas em quarto de círculo por livro: a marca é uma pena sobre um livro
+      escalas: vão espaco-4 (16), páginas de raio 48 (espaco-6 x 2), lombada espaco-1 (4), cantos raio-lg
+    -->
+    <rect class="semed" x="-12" y="-12" width="428" height="124" />
+    <rect class="semed-claro r-lg" x="432" y="-12" width="256" height="124" />
+    <rect class="semed-escuro r-lg" x="704" y="-12" width="96" height="124" />
+    <rect class="semed r-lg" x="816" y="-12" width="160" height="124" />
+    <g class="pagina-clara">
+      <path d="M102 88 V40 A48 48 0 0 0 54 88 Z" /><path d="M106 88 V40 A48 48 0 0 1 154 88 Z" />
+      <path d="M206 88 V40 A48 48 0 0 0 158 88 Z" /><path d="M210 88 V40 A48 48 0 0 1 258 88 Z" />
+      <path d="M310 88 V40 A48 48 0 0 0 262 88 Z" /><path d="M314 88 V40 A48 48 0 0 1 362 88 Z" />
+    </g>
+    <g class="pagina-semed">
+      <path d="M534 88 V40 A48 48 0 0 0 486 88 Z" /><path d="M538 88 V40 A48 48 0 0 1 586 88 Z" />
+      <path d="M638 88 V56 A32 32 0 0 0 606 88 Z" /><path d="M642 88 V56 A32 32 0 0 1 674 88 Z" />
+    </g>
+  </svg>
+  <div class="texto">
+    <h1 class="nome">Central Educacional<br>SEMED</h1>
+    <p class="lema">Leitura, escrita e oralidade da rede municipal, do celular do professor à secretaria.</p>
+  </div>
+</div>
+</body>
+</html>

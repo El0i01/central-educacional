@@ -1,0 +1,18 @@
+<!-- @dsCard group="Formulário" height=300 subtitle="Um item da FLEO" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>EscalaOpcoes — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  function Demo() {
+    var e = React.useState('Em desenvolvimento');
+    return h('div', { style: { width: '100%', maxWidth: '420px' } },
+      h(C.EscalaOpcoes, { nome: 'leitura-1', enunciado: 'Lê palavras de uso frequente', opcoes: ['Ainda não observado', 'Em desenvolvimento', 'Observado'], valor: e[0], onChange: e[1] }));
+  }
+  ReactDOM.createRoot(document.getElementById('raiz')).render(h(Demo));
+</script>
+</body>
+</html>

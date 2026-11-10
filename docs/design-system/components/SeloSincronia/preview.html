@@ -1,0 +1,15 @@
+<!-- @dsCard group="Situação" height=64 subtitle="Onde está o registro no celular" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>SeloSincronia — prévia</title>
+<style>#raiz{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}</style></head>
+<body>
+<div id="raiz"></div>
+<script>
+  var C = window.CentralUI, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('raiz')).render(h(React.Fragment, null,
+    ['aparelho','aguardando','sincronizado'].map(function (s) { return h(C.SeloSincronia, { key: s, estado: s }); }),
+    h(C.SeloSituacao, { situacao: 'enviada' })));
+</script>
+</body>
+</html>
