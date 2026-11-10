@@ -315,3 +315,59 @@ export interface PossivelDuplicado {
   dataNascimento: string | null;
   turmaAtual: string | null;
 }
+
+// --- Plataforma: importação (M09, UC-M01 a M05) ---
+
+export type SituacaoLote = 'com_inconsistencias' | 'pronto' | 'publicado' | 'descartado';
+
+export const ROTULO_SITUACAO_LOTE: Record<SituacaoLote, string> = {
+  com_inconsistencias: 'Com inconsistências',
+  pronto: 'Pronto para publicar',
+  publicado: 'Publicado',
+  descartado: 'Descartado',
+};
+
+export interface LinhaImportacao {
+  numero: number;
+  dados: {
+    escolaInep?: string | null;
+    escola?: string | null;
+    turma?: string;
+    etapa?: Etapa;
+    turno?: Turno | null;
+    estudante?: string;
+    dataNascimento?: string | null;
+    inepEstudante?: string | null;
+  };
+  /** nova: vai criar a matrícula · ja_existe: nada a fazer · problema: precisa corrigir ou ignorar. */
+  situacao: 'nova' | 'ja_existe' | 'problema';
+  problemas: string[];
+  ignorar: boolean;
+}
+
+export interface LoteImportacao {
+  id: number;
+  tipo: 'matriculas';
+  arquivoNome: string;
+  anoLetivo: number;
+  situacao: SituacaoLote;
+  total: number;
+  novas: number;
+  jaExistentes: number;
+  comProblema: number;
+  ignoradas: number;
+  /** Outro lote já publicado com o mesmo arquivo. */
+  mesmoArquivoPublicadoEm: string | null;
+  resumo: { matriculasCriadas: number; turmasCriadas: number; estudantesCriados: number } | null;
+  criadoPor: string;
+  criadoEm: string;
+  publicadoEm: string | null;
+  linhas?: LinhaImportacao[];
+}
+
+export interface NovaImportacaoPedido {
+  tipo: 'matriculas';
+  arquivoNome: string;
+  conteudo: string;
+  anoLetivo?: number;
+}

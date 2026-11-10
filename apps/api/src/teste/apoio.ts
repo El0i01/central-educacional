@@ -8,7 +8,7 @@ import type { Perfil } from '@central/tipos';
 export const URL_TESTE = process.env.TEST_DATABASE_URL ?? '';
 export const SEGREDO_TESTE = 'segredo-de-teste-com-mais-de-32-caracteres!!';
 
-const SCHEMAS = ['fleo', 'rede', 'acesso', 'nucleo'];
+const SCHEMAS = ['importacao', 'fleo', 'rede', 'acesso', 'nucleo'];
 
 /** Apaga os schemas da central e aplica todas as migrações. Só em banco de teste. */
 export async function bancoLimpo(): Promise<pg.Pool> {

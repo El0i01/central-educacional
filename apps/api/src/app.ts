@@ -6,6 +6,7 @@ import { rotasGestaoUsuarios } from './plataforma/acesso/gestao.js';
 import { rotasEu, rotasLogin } from './plataforma/acesso/rotas.js';
 import { repositorioUsuarios } from './plataforma/acesso/usuarios.js';
 import { montarModulos, type RegistroModulo } from './plataforma/modulos.js';
+import { rotasImportacao } from './plataforma/importacao/rotas.js';
 import { rotasRede } from './plataforma/rede/rotas.js';
 
 export interface Dependencias {
@@ -43,7 +44,9 @@ export function criarApp(deps: Dependencias): express.Express {
     });
   }
 
-  app.use(express.json({ limit: '256kb' }));
+  // Corpo JSON até 256 KB; a importação de planilha tem limite próprio (5 MB) na rota dela.
+  const json = express.json({ limit: '256kb' });
+  app.use((req, res, next) => (req.path.startsWith('/api/importacoes') ? next() : json(req, res, next)));
 
   const usuarios = repositorioUsuarios(deps.pool);
   const acesso = { pool: deps.pool, usuarios, jwtSegredo: deps.jwtSegredo, jwtValidade: deps.jwtValidade };
@@ -66,6 +69,7 @@ export function criarApp(deps: Dependencias): express.Express {
   app.use('/api', rotasEu(acesso));
   app.use('/api', rotasGestaoUsuarios({ pool: deps.pool }));
   app.use('/api', rotasRede({ pool: deps.pool }));
+  app.use('/api', rotasImportacao({ pool: deps.pool }));
   app.use('/api', montarModulos(deps.modulos, { pool: deps.pool }));
 
   app.use('/api', (_req, res) => {
