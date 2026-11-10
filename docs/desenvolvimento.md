@@ -68,16 +68,16 @@ Uma funcionalidade = um caso de uso de [funcionalidades.md](funcionalidades.md).
 
 Ordem sugerida, cada item um commit:
 
-| # | Tarefa | Pronto quando |
-|---|---|---|
-| 0.1 | `git init`, primeiro commit com docs/ e CLAUDE.md | Repositório criado |
-| 0.2 | **Alinhar o rascunho de código** com a documentação: schemas por módulo (`nucleo`, `acesso`, `rede`, `fleo`), os 6 perfis, pastas `plataforma/` e `modulos/` na API | `pnpm test` passa |
-| 0.3 | `pnpm install`, lint, Vitest rodando em todos os pacotes | `pnpm lint && pnpm test` verdes |
-| 0.4 | `infra/docker-compose.yml` (db, migrar, api, web) | `docker compose up` sobe tudo |
-| 0.5 | Migração `001_nucleo` (histórico, config com `modulos_ativos`, job) | Migra do zero |
-| 0.6 | `packages/ui`: shadcn iniciado no monorepo, `tema.css` gerado de `tokens.json`, os 8 componentes do design system | Página de exemplo no `apps/web` mostra os 8 nos dois temas |
-| 0.7 | `apps/web`: Vite + React Router + Tailwind 4, casca com `MenuLateral` montado pelo registro de módulos | Menu muda ao ligar/desligar a FLEO na config |
-| 0.8 | Revisão com `web-design-guidelines` e conferência com `chrome-devtools` da casca | Sem apontamentos |
+| # | Tarefa | Pronto quando | Situação |
+|---|---|---|---|
+| 0.1 | `git init`, primeiro commit com docs/ e CLAUDE.md | Repositório criado | ✔ feito |
+| 0.2 | **Alinhar o rascunho de código** com a documentação: schemas por módulo (`nucleo`, `acesso`, `rede`, `fleo`), os 6 perfis, pastas `plataforma/` e `modulos/` na API | `pnpm test` passa | ✔ feito |
+| 0.3 | `pnpm install`, lint, Vitest rodando em todos os pacotes | `pnpm lint && pnpm test` verdes | ✔ feito |
+| 0.4 | `infra/docker-compose.yml` (db, migrar, api, web) | `docker compose up` sobe tudo | ✔ feito |
+| 0.5 | Migração `001_nucleo` (histórico, config com `modulos_ativos`, job) | Migra do zero | ✔ feito |
+| 0.6 | `packages/ui`: shadcn iniciado no monorepo, `tema.css` gerado de `tokens.json`, os 8 componentes do design system | Página de exemplo no `apps/web` mostra os 8 nos dois temas | a fazer |
+| 0.7 | `apps/web`: Vite + React Router + Tailwind 4, casca com `MenuLateral` montado pelo registro de módulos | Menu muda ao ligar/desligar a FLEO na config | a fazer |
+| 0.8 | Revisão com `web-design-guidelines` e conferência com `chrome-devtools` da casca | Sem apontamentos | a fazer |
 
 Depois da Fase 0, a Fase 1 (plataforma: acesso, rede, importação) segue o CLAUDE.md, seção 10.
 
