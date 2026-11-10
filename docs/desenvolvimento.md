@@ -76,7 +76,7 @@ Ordem sugerida, cada item um commit:
 | 0.4 | `infra/docker-compose.yml` (db, migrar, api, web) | `docker compose up` sobe tudo | ✔ feito |
 | 0.5 | Migração `001_nucleo` (histórico, config com `modulos_ativos`, job) | Migra do zero | ✔ feito |
 | 0.6 | `packages/ui`: shadcn iniciado no monorepo, `tema.css` gerado de `tokens.json`, os 8 componentes do design system | Página de exemplo no `apps/web` mostra os 8 nos dois temas | a fazer |
-| 0.7 | `apps/web`: Vite + React Router + Tailwind 4, casca com `MenuLateral` montado pelo registro de módulos | Menu muda ao ligar/desligar a FLEO na config | a fazer |
+| 0.7 | `apps/web`: Vite + React Router + Tailwind 4, casca com `MenuLateral` montado pelo registro de módulos | Menu muda ao ligar/desligar a FLEO na config | casca inicial no ar (login, troca de senha, menu pelos módulos); falta passar para `@central/ui` |
 | 0.8 | Revisão com `web-design-guidelines` e conferência com `chrome-devtools` da casca | Sem apontamentos | a fazer |
 
 Depois da Fase 0, a Fase 1 (plataforma: acesso, rede, importação) segue o CLAUDE.md, seção 10.

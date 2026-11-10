@@ -1,0 +1,88 @@
+/* Gerado de docs/design-system/tokens.json por scripts/gerar-tema.mjs. Não edite à mão. */
+:root {
+  --fundo: #f4f6fa;
+  --superficie: #ffffff;
+  --superficie-2: #eaf0f8;
+  --tinta: #1b2638;
+  --tinta-suave: #4f5d72;
+  --linha: #d8e0eb;
+  --borda-controle: #7d8aa0;
+  --semed: #2b5598;
+  --semed-escuro: #1d3d70;
+  --semed-claro: #dbe6f6;
+  --sobre-semed: #ffffff;
+  --rascunho-fundo: #eceff4;
+  --rascunho-tinta: #4a5568;
+  --enviada-fundo: #fbf0dc;
+  --enviada-tinta: #7a4d06;
+  --devolvida-fundo: #fbe5df;
+  --devolvida-tinta: #9a3412;
+  --validada-fundo: #ddf1e6;
+  --validada-tinta: #1f6f4a;
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-6: 24px;
+  --espaco-8: 32px;
+  --raio-sm: 4px;
+  --raio-md: 8px;
+  --raio-lg: 12px;
+  --raio-pilula: 999px;
+  --alvo-toque: 44px;
+  --coluna-leitura: 72ch;
+  --menu-lateral: 248px;
+  --sombra-flutuante: 0 8px 24px rgba(27, 38, 56, 0.12);
+  --font-titulo: "Lexend", "Segoe UI", system-ui, sans-serif;
+  --font-texto: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) {
+    --fundo: #0f1522;
+    --superficie: #161e2e;
+    --superficie-2: #1d2840;
+    --tinta: #e6ecf5;
+    --tinta-suave: #a5b2c6;
+    --linha: #2a3650;
+    --borda-controle: #6b7a95;
+    --semed: #8fb1e8;
+    --semed-escuro: #b9cff2;
+    --semed-claro: #22345a;
+    --sobre-semed: #0f1522;
+    --rascunho-fundo: #252f42;
+    --rascunho-tinta: #c3cddb;
+    --enviada-fundo: #3a2e17;
+    --enviada-tinta: #f3c77a;
+    --devolvida-fundo: #3d221c;
+    --devolvida-tinta: #f6a98f;
+    --validada-fundo: #17342a;
+    --validada-tinta: #7fd6a8;
+    --sombra-flutuante: 0 8px 24px rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+  }
+}
+:root[data-tema='escuro'] {
+  --fundo: #0f1522;
+  --superficie: #161e2e;
+  --superficie-2: #1d2840;
+  --tinta: #e6ecf5;
+  --tinta-suave: #a5b2c6;
+  --linha: #2a3650;
+  --borda-controle: #6b7a95;
+  --semed: #8fb1e8;
+  --semed-escuro: #b9cff2;
+  --semed-claro: #22345a;
+  --sobre-semed: #0f1522;
+  --rascunho-fundo: #252f42;
+  --rascunho-tinta: #c3cddb;
+  --enviada-fundo: #3a2e17;
+  --enviada-tinta: #f3c77a;
+  --devolvida-fundo: #3d221c;
+  --devolvida-tinta: #f6a98f;
+  --validada-fundo: #17342a;
+  --validada-tinta: #7fd6a8;
+  --sombra-flutuante: 0 8px 24px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}

@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+@import '@fontsource/lexend/400.css';
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+@import '@fontsource/source-sans-3/400.css';
+@import '@fontsource/source-sans-3/600.css';
+@import '@fontsource/source-sans-3/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import './tema.gerado.css';
+@import './componentes.css';
+
+/* Classes do Tailwind ligadas aos tokens do design system (docs/design-system.md). */
+@theme inline {
+  --color-fundo: var(--fundo);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-linha: var(--linha);
+  --color-semed: var(--semed);
+  --color-semed-escuro: var(--semed-escuro);
+  --color-semed-claro: var(--semed-claro);
+  --color-sobre-semed: var(--sobre-semed);
+  /* font-display = Lexend (títulos). font-mono já lê --font-mono do tema gerado. */
+  --font-display: var(--font-titulo);
+  --font-sans: var(--font-texto);
+}
+
+html,
+body,
+#raiz {
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--font-texto);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 3px solid var(--semed);
+  outline-offset: 2px;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--font-titulo);
+  text-wrap: balance;
+}

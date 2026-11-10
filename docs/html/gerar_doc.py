@@ -144,7 +144,7 @@ def css_tokens() -> str:
 
 def css_componentes() -> str:
     css = (DS / "components/bundle.css").read_text(encoding="utf-8")
-    css = re.sub(r"@import[^;]+;", "", css)
+    css = re.sub(r"@import url\([^)]*\);", "", css)
     return re.sub(r"\nbody \{[^}]*\}", "", css)
 
 

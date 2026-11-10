@@ -1,0 +1,121 @@
+/* Cópia de docs/design-system/components/bundle.css (sem @import e body). Vira packages/ui na tarefa 0.6. */
+/* Componentes da Central Educacional. Cores, espaços e raios só por token (tokens.json). */
+
+
+.ce-icone { flex: none; }
+.ce-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ce-codigo { font-family: var(--font-mono); font-size: 13px; color: var(--tinta-suave); }
+
+/* Botão */
+.ce-botao {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--espaco-2);
+  min-height: var(--alvo-toque); padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio-md); border: 1px solid transparent;
+  font: 600 15px/1.2 var(--font-texto); cursor: pointer; white-space: nowrap; text-decoration: none;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.ce-botao:focus-visible, .ce-opcao:focus-within, .ce-controle:focus-visible {
+  outline: 3px solid var(--semed); outline-offset: 2px;
+}
+.ce-botao:disabled { opacity: .55; cursor: not-allowed; }
+.ce-botao-primario { background: var(--semed); color: var(--sobre-semed); }
+.ce-botao-primario:hover:not(:disabled) { background: var(--semed-escuro); }
+.ce-botao-secundario { background: var(--superficie); color: var(--tinta); border-color: var(--borda-controle); }
+.ce-botao-secundario:hover:not(:disabled) { background: var(--superficie-2); }
+.ce-botao-discreto { background: transparent; color: var(--semed); }
+.ce-botao-discreto:hover:not(:disabled) { background: var(--semed-claro); }
+.ce-botao-perigo { background: var(--superficie); color: var(--devolvida-tinta); border-color: var(--devolvida-tinta); }
+.ce-botao-perigo:hover:not(:disabled) { background: var(--devolvida-fundo); }
+.ce-largo { width: 100%; }
+a.ce-botao { box-sizing: border-box; }
+.ce-girando { animation: ce-girar 900ms linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes ce-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ce-botao, .ce-opcao { transition: none; } .ce-girando { animation: none; } }
+
+/* Selos */
+.ce-selo {
+  display: inline-flex; align-items: center; gap: var(--espaco-1);
+  padding: 4px 10px; border-radius: var(--raio-pilula);
+  font: 600 13px/18px var(--font-texto); white-space: nowrap;
+}
+.ce-selo-rascunho { background: var(--rascunho-fundo); color: var(--rascunho-tinta); }
+.ce-selo-enviada { background: var(--enviada-fundo); color: var(--enviada-tinta); }
+.ce-selo-devolvida { background: var(--devolvida-fundo); color: var(--devolvida-tinta); }
+.ce-selo-validada { background: var(--validada-fundo); color: var(--validada-tinta); }
+.ce-selo-semed { background: var(--semed-claro); color: var(--semed); }
+
+/* Campo */
+.ce-campo { display: grid; gap: 6px; }
+.ce-rotulo { font: 600 13px/18px var(--font-texto); letter-spacing: .02em; color: var(--tinta-suave); }
+.ce-controle {
+  width: 100%; min-height: var(--alvo-toque); box-sizing: border-box;
+  padding: var(--espaco-3) var(--espaco-4); border: 1px solid var(--borda-controle);
+  border-radius: var(--raio-md); background: var(--superficie); color: var(--tinta);
+  font: 400 16px/24px var(--font-texto);
+}
+textarea.ce-controle { resize: vertical; }
+.ce-controle:disabled { background: var(--superficie-2); color: var(--tinta-suave); }
+.ce-campo-erro .ce-controle { border-color: var(--devolvida-tinta); }
+.ce-ajuda, .ce-erro { margin: 0; font: 400 14px/20px var(--font-texto); }
+.ce-ajuda { color: var(--tinta-suave); }
+.ce-erro { color: var(--devolvida-tinta); font-weight: 600; }
+
+/* Escala de opções (item da FLEO) */
+.ce-escala { border: 0; margin: 0; padding: 0; min-width: 0; }
+.ce-escala-enunciado { padding: 0; margin-bottom: var(--espaco-3); font: 500 17px/24px var(--font-titulo); color: var(--tinta); }
+.ce-escala-opcoes { display: grid; gap: var(--espaco-2); }
+.ce-opcao {
+  position: relative; display: flex; align-items: center; gap: var(--espaco-3);
+  min-height: 52px; padding: var(--espaco-2) var(--espaco-4); box-sizing: border-box;
+  border: 1px solid var(--borda-controle); border-radius: var(--raio-md);
+  background: var(--superficie); color: var(--tinta); cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.ce-opcao input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ce-opcao:hover { background: var(--superficie-2); }
+.ce-opcao-passo {
+  display: grid; place-items: center; width: 28px; height: 28px; flex: none;
+  border-radius: var(--raio-pilula); background: var(--superficie-2); color: var(--tinta-suave);
+  font: 500 13px/1 var(--font-mono);
+}
+.ce-opcao-marcada, .ce-opcao-marcada:hover { background: var(--semed-claro); border-color: var(--semed); color: var(--tinta); font-weight: 600; }
+.ce-opcao-marcada .ce-opcao-passo { background: var(--semed); color: var(--sobre-semed); }
+.ce-opcao-visto { margin-left: auto; color: var(--semed); }
+.ce-escala:disabled .ce-opcao { cursor: default; }
+
+/* Aviso */
+.ce-aviso {
+  display: flex; gap: var(--espaco-3); align-items: flex-start;
+  padding: var(--espaco-3) var(--espaco-4); border-radius: var(--raio-md); font-size: 15px; line-height: 22px;
+}
+.ce-aviso .ce-icone { margin-top: 2px; }
+.ce-aviso-corpo { display: grid; gap: 2px; min-width: 0; }
+.ce-aviso-info { background: var(--semed-claro); color: var(--tinta); }
+.ce-aviso-info .ce-icone { color: var(--semed); }
+.ce-aviso-atencao { background: var(--enviada-fundo); color: var(--enviada-tinta); }
+.ce-aviso-erro { background: var(--devolvida-fundo); color: var(--devolvida-tinta); }
+.ce-aviso-sucesso { background: var(--validada-fundo); color: var(--validada-tinta); }
+
+/* Progresso */
+.ce-progresso { display: grid; gap: 6px; }
+.ce-progresso-rotulo { display: flex; justify-content: space-between; gap: var(--espaco-2); font: 400 14px/20px var(--font-texto); color: var(--tinta-suave); }
+.ce-progresso-trilho { height: 8px; border-radius: var(--raio-pilula); background: var(--superficie-2); overflow: hidden; }
+.ce-progresso-trilho i { display: block; height: 100%; border-radius: inherit; background: var(--semed); }
+
+/* Cartão de turma */
+.ce-cartao {
+  display: grid; gap: var(--espaco-3); padding: var(--espaco-6);
+  background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio-lg);
+}
+.ce-cartao-topo { display: flex; align-items: center; justify-content: space-between; }
+.ce-cartao-icone {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  border-radius: var(--raio-md); background: var(--semed-claro); color: var(--semed);
+}
+.ce-cartao-titulo { margin: 0; font: 600 20px/28px var(--font-titulo); color: var(--tinta); text-wrap: balance; overflow-wrap: anywhere; }
+.ce-cartao-escola { margin: -8px 0 0; color: var(--tinta-suave); font-size: 14px; overflow-wrap: anywhere; }
+.ce-cartao-numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-2); margin: 0; }
+.ce-cartao-numeros dt { font: 600 12px/16px var(--font-texto); color: var(--tinta-suave); }
+.ce-cartao-numeros dd { margin: 2px 0 0; font-size: 22px; color: var(--tinta); }
