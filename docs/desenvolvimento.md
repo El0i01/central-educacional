@@ -112,10 +112,10 @@ Depois da Fase 0, a Fase 1 (plataforma: acesso, rede, importação) segue o CLAU
 | Rede escolar (API + telas "Escolas e turmas" e turma) | UC-R01 a R05, R08, R09 | ✔ feito |
 | Importação de matrículas (API + tela "Importação") | UC-M01 a M04 | ✔ feito, 7 + 7 testes |
 | Dados fictícios (`pnpm semear`) | — | ✔ feito |
-| Transferência com histórico entre escolas | UC-R07 | parcial: muda a situação da matrícula; falta o fluxo "transferir para" |
-| Histórico de acessos e acesso nominal (tela) | UC-A07 | a fazer (os registros já são gravados) |
-| Ligar e desligar módulos (tela) | UC-A08 | a fazer (hoje direto em `nucleo.config`) |
-| Desfazer a última importação | UC-M05 | a fazer |
+| Transferência com histórico entre escolas | UC-R07 | ✔ feito: "Transferir" na turma (mesmo ano letivo), origem fica como transferida, trajetória do estudante |
+| Histórico de acessos e acesso nominal (tela) | UC-A07 | ✔ feito: tela "Acessos" do admin (entradas, dado de estudante sem nome, alterações) |
+| Ligar e desligar módulos (tela) | UC-A08 | ✔ feito: tela "Módulos" do admin; desligar exige motivo, não apaga dado |
+| Desfazer a última importação | UC-M05 | ✔ feito: só a mais recente, com motivo; recusa se a matrícula mudou ou já tem ficha (migração 008) |
 | Arquivos por hash, backup diário | UC-X04, X06 | a fazer (junto com o deploy) |
 
 ### shadcn no monorepo
