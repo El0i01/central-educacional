@@ -32,6 +32,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@central/escopo':
+        specifier: workspace:^
+        version: link:../../packages/escopo
       '@central/fleo':
         specifier: workspace:^
         version: link:../../packages/fleo

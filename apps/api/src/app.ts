@@ -2,9 +2,11 @@ import type { Saude } from '@central/tipos';
 import express, { type ErrorRequestHandler } from 'express';
 import type pg from 'pg';
 import { autenticar } from './plataforma/acesso/middleware.js';
+import { rotasGestaoUsuarios } from './plataforma/acesso/gestao.js';
 import { rotasEu, rotasLogin } from './plataforma/acesso/rotas.js';
 import { repositorioUsuarios } from './plataforma/acesso/usuarios.js';
 import { montarModulos, type RegistroModulo } from './plataforma/modulos.js';
+import { rotasRede } from './plataforma/rede/rotas.js';
 
 export interface Dependencias {
   pool: pg.Pool;
@@ -62,6 +64,8 @@ export function criarApp(deps: Dependencias): express.Express {
   // --- Daqui para baixo, toda rota exige login. ---
   app.use('/api', autenticar(usuarios, deps.jwtSegredo));
   app.use('/api', rotasEu(acesso));
+  app.use('/api', rotasGestaoUsuarios({ pool: deps.pool }));
+  app.use('/api', rotasRede({ pool: deps.pool }));
   app.use('/api', montarModulos(deps.modulos, { pool: deps.pool }));
 
   app.use('/api', (_req, res) => {

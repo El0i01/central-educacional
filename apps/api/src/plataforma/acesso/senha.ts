@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 
 const CUSTO = 12;
@@ -24,3 +25,21 @@ export function validarSenhaNova(senha: unknown): string | null {
 
 // Tentativas erradas seguidas bloqueiam o login por alguns minutos.
 export const REGRA_BLOQUEIO = { maxFalhas: 5, bloqueioMin: 15 };
+
+// Recuperação sem e-mail: o admin ou o responsável pelos cadastros gera uma senha provisória, que
+// vale por pouco tempo e obriga a troca no primeiro login.
+export const VALIDADE_PROVISORIA_HORAS = 24;
+
+// Sem letras e números que se confundem (l, 1, o, 0, i), para ditar ou copiar do papel.
+const ALFABETO = 'abcdefghjkmnpqrstuvwxyz23456789';
+
+/** Senha provisória legível em três grupos: `xxxx-xxxx-xxxx` (14 caracteres). */
+export function gerarSenhaProvisoria(): { senha: string; expiraEm: Date } {
+  const grupos = Array.from({ length: 3 }, () =>
+    Array.from({ length: 4 }, () => ALFABETO[randomInt(ALFABETO.length)]).join(''),
+  );
+  return {
+    senha: grupos.join('-'),
+    expiraEm: new Date(Date.now() + VALIDADE_PROVISORIA_HORAS * 3600_000),
+  };
+}

@@ -175,3 +175,143 @@ export interface Resumo {
   pendentes: number;
   distribuicao: LinhaDistribuicao[];
 }
+
+// --- Plataforma: gestão de usuários (M01, UC-A04 a A06) ---
+
+export interface UsuarioGestao {
+  id: number;
+  login: string;
+  nome: string;
+  perfil: Perfil;
+  ativo: boolean;
+  /** Senha provisória ainda não trocada. */
+  trocarSenha: boolean;
+  bloqueado: boolean;
+  /** Escolas vinculadas (coordenação, equipe pedagógica). */
+  escolas: number[];
+}
+
+export interface ListaUsuarios {
+  usuarios: UsuarioGestao[];
+  /** Perfis que quem está logado pode criar ou atribuir. */
+  perfisAtribuiveis: Perfil[];
+}
+
+export interface CriarUsuarioPedido {
+  login: string;
+  nome: string;
+  perfil: Perfil;
+  escolas?: number[];
+}
+
+export interface EditarUsuarioPedido {
+  nome?: string;
+  perfil?: Perfil;
+  ativo?: boolean;
+  escolas?: number[];
+}
+
+/** A senha provisória aparece uma única vez, nesta resposta. */
+export interface SenhaProvisoriaResposta {
+  usuario: UsuarioGestao;
+  senhaProvisoria: string;
+  expiraEm: string;
+}
+
+// --- Plataforma: rede escolar (M02, UC-R01 a R09) ---
+
+export type Zona = 'urbana' | 'rural';
+export type Turno = 'matutino' | 'vespertino' | 'noturno' | 'integral';
+export type SituacaoMatricula = 'ativa' | 'transferida' | 'abandono' | 'concluida';
+
+export const ETAPAS = ['EI4', 'EI5', 'EF1', 'EF2', 'EF3', 'EF4', 'EF5', 'EF6', 'EF7', 'EF8', 'EF9'] as const;
+export type Etapa = (typeof ETAPAS)[number];
+
+export const ROTULO_ETAPA: Record<Etapa, string> = {
+  EI4: 'Pré I (4 anos)',
+  EI5: 'Pré II (5 anos)',
+  EF1: '1º ano',
+  EF2: '2º ano',
+  EF3: '3º ano',
+  EF4: '4º ano',
+  EF5: '5º ano',
+  EF6: '6º ano',
+  EF7: '7º ano',
+  EF8: '8º ano',
+  EF9: '9º ano',
+};
+
+export const ROTULO_SITUACAO_MATRICULA: Record<SituacaoMatricula, string> = {
+  ativa: 'Ativa',
+  transferida: 'Transferida',
+  abandono: 'Abandono',
+  concluida: 'Concluída',
+};
+
+export interface Escola {
+  id: number;
+  inep: string | null;
+  nome: string;
+  zona: Zona;
+  ativa: boolean;
+  turmas: number;
+  matriculasAtivas: number;
+}
+
+export interface AnoLetivo {
+  ano: number;
+  inicio: string;
+  fim: string;
+}
+
+export interface TurmaLista {
+  id: number;
+  escolaId: number;
+  escola: string;
+  anoLetivo: number;
+  nome: string;
+  etapa: Etapa;
+  turno: Turno | null;
+  estudantes: number;
+  professores: string[];
+}
+
+export interface ProfessorTurma {
+  usuarioId: number;
+  nome: string;
+  papel: 'regente' | 'apoio';
+}
+
+export interface MatriculaTurma {
+  id: number;
+  estudanteId: number;
+  nome: string;
+  dataNascimento: string | null;
+  codigoInep: string | null;
+  situacao: SituacaoMatricula;
+}
+
+export interface TurmaDetalhe extends TurmaLista {
+  professoresTurma: ProfessorTurma[];
+  /** null quando o perfil não pode ver nome de estudante (gestor). */
+  matriculas: MatriculaTurma[] | null;
+  /** O que quem está vendo pode fazer nesta turma. */
+  pode: { editar: boolean; atribuirProfessores: boolean; matricular: boolean };
+}
+
+export interface MatricularPedido {
+  /** Estudante já cadastrado na rede, ou os dados de um novo. */
+  estudanteId?: number;
+  nome?: string;
+  dataNascimento?: string | null;
+  codigoInep?: string | null;
+  /** Confirma que é outra pessoa, mesmo com nome e nascimento iguais a um cadastro existente. */
+  confirmarNovo?: boolean;
+}
+
+export interface PossivelDuplicado {
+  estudanteId: number;
+  nome: string;
+  dataNascimento: string | null;
+  turmaAtual: string | null;
+}

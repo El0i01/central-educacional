@@ -11,6 +11,7 @@
     "criar-admin": "node dist/criar-admin.js"
   },
   "dependencies": {
+    "@central/escopo": "workspace:^",
     "@central/fleo": "workspace:^",
     "bcryptjs": "3",
     "express": "^5.3.0",
